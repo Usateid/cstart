@@ -22,6 +22,13 @@
       "when": 1754051633749,
       "tag": "0002_luxuriant_supreme_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754053503264,
+      "tag": "0003_tired_millenium_guard",
+      "breakpoints": true
     }
   ]
 }

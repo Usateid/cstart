@@ -1,0 +1,1 @@
+ALTER TABLE "activity_types" ADD COLUMN "duration" integer;

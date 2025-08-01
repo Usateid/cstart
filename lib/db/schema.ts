@@ -39,6 +39,7 @@ export const activityTypes = pgTable("activity_types", {
   userId: integer("user_id")
     .references(() => users.id)
     .notNull(),
+  duration: integer("duration"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
