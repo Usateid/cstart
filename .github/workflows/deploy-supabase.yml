@@ -25,4 +25,4 @@ jobs:
           fi
 
       - name: Apply Supabase migrations
-        run: supabase db push --db-url $SUPABASE_DB_URL
+        run: supabase db push --db-url $SUPABASE_DB_URL --migrations-dir lib/db/migrations
