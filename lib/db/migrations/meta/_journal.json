@@ -8,6 +8,20 @@
       "when": 1726443359662,
       "tag": "0000_soft_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754041550905,
+      "tag": "0001_steady_living_tribunal",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754051633749,
+      "tag": "0002_luxuriant_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }
