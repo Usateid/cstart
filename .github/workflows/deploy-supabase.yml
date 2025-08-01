@@ -22,8 +22,6 @@ jobs:
         run: |
           if [ "$GITHUB_REF" == "refs/heads/main" ]; then
             echo "SUPABASE_DB_URL=${{ secrets.SUPABASE_DB_URL_PRODUCTION }}" >> $GITHUB_ENV
-          else
-            echo "SUPABASE_DB_URL=${{ secrets.SUPABASE_DB_URL_ACCEPTANCE }}" >> $GITHUB_ENV
           fi
 
       - name: Apply Supabase migrations
