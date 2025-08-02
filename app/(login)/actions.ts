@@ -65,6 +65,10 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   if (userWithTeam.length === 0) {
     return {
       error: "Invalid email or password. Please try again.",
+      fieldErrors: {
+        email: "Invalid email or password. Please try again.",
+        password: "Invalid email or password. Please try again.",
+      },
       email,
       password,
     };
@@ -80,6 +84,10 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   if (!isPasswordValid) {
     return {
       error: "Invalid email or password. Please try again.",
+      fieldErrors: {
+        email: "Invalid email or password. Please try again.",
+        password: "Invalid email or password. Please try again.",
+      },
       email,
       password,
     };
@@ -103,10 +111,26 @@ const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   inviteId: z.string().optional(),
+  name: z.string().min(1),
+  surname: z.string().min(1),
+  birthDate: z.string().transform((str) => new Date(str)),
+  taxCode: z.string().min(1).max(16),
+  phoneNumber: z.string().min(1),
+  address: z.string().min(1),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId } = data;
+  const {
+    email,
+    password,
+    inviteId,
+    name,
+    surname,
+    birthDate,
+    taxCode,
+    phoneNumber,
+    address,
+  } = data;
 
   const existingUser = await db
     .select()
@@ -116,7 +140,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: "Failed to create user. Please try again.",
+      error: "Email already in use. Please try again.",
+      fieldErrors: {
+        email: "Email already in use. Please try again.",
+      },
       email,
       password,
     };
@@ -127,6 +154,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const newUser: NewUser = {
     email,
     passwordHash,
+    name,
+    surname,
+    birthDate,
+    taxCode,
+    phoneNumber,
+    address,
     role: "member", // Default role, will be overridden if there's an invitation
   };
 
@@ -135,6 +168,9 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   if (!createdUser) {
     return {
       error: "Failed to create user. Please try again.",
+      fieldErrors: {
+        email: "Failed to create user. Please try again.",
+      },
       email,
       password,
     };
@@ -154,6 +190,9 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   if (!createdTeam) {
     return {
       error: "Failed to create team. Please try again.",
+      fieldErrors: {
+        email: "Failed to create team. Please try again.",
+      },
       email,
       password,
     };
@@ -214,6 +253,9 @@ export const updatePassword = validatedActionWithUser(
         newPassword,
         confirmPassword,
         error: "Current password is incorrect.",
+        fieldErrors: {
+          currentPassword: "Current password is incorrect.",
+        },
       };
     }
 
@@ -223,6 +265,10 @@ export const updatePassword = validatedActionWithUser(
         newPassword,
         confirmPassword,
         error: "New password must be different from the current password.",
+        fieldErrors: {
+          newPassword:
+            "New password must be different from the current password.",
+        },
       };
     }
 
@@ -232,6 +278,10 @@ export const updatePassword = validatedActionWithUser(
         newPassword,
         confirmPassword,
         error: "New password and confirmation password do not match.",
+        fieldErrors: {
+          confirmPassword:
+            "New password and confirmation password do not match.",
+        },
       };
     }
 
@@ -266,6 +316,9 @@ export const deleteAccount = validatedActionWithUser(
       return {
         password,
         error: "Incorrect password. Account deletion failed.",
+        fieldErrors: {
+          password: "Incorrect password. Account deletion failed.",
+        },
       };
     }
 

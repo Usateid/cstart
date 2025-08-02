@@ -51,6 +51,11 @@ async function seed() {
         email: email,
         passwordHash: passwordHash,
         role: "owner",
+        surname: "N/A",
+        birthDate: new Date(),
+        taxCode: "N/A",
+        phoneNumber: "N/A",
+        address: "N/A",
       },
     ])
     .returning();

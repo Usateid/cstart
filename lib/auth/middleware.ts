@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 export type ActionState = {
   error?: string;
   success?: string;
+  fieldErrors?: Record<string, string>; // Errori specifici per campo
   [key: string]: any; // This allows for additional properties
 };
 
@@ -19,9 +20,21 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
   action: ValidatedActionFunction<S, T>
 ) {
   return async (prevState: ActionState, formData: FormData) => {
-    const result = schema.safeParse(Object.fromEntries(formData));
+    const formDataObj = Object.fromEntries(formData);
+    const result = schema.safeParse(formDataObj);
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      // Mappa gli errori di validazione ai campi specifici
+      const fieldErrors: ActionState["fieldErrors"] = {};
+      result.error.errors.forEach((error) => {
+        const fieldName = error.path.join(".");
+        fieldErrors[fieldName] = error.message;
+      });
+
+      return {
+        error: result.error.errors[0].message,
+        fieldErrors,
+        ...formDataObj,
+      };
     }
 
     return action(result.data, formData);
@@ -46,7 +59,17 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
 
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      // Mappa gli errori di validazione ai campi specifici
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((error) => {
+        const fieldName = error.path.join(".");
+        fieldErrors[fieldName] = error.message;
+      });
+
+      return {
+        error: result.error.errors[0].message,
+        fieldErrors,
+      };
     }
 
     return action(result.data, formData, user);
