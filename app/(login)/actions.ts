@@ -24,6 +24,7 @@ import {
   validatedAction,
   validatedActionWithUser,
 } from "@/lib/auth/middleware";
+import { getUserByEmail } from "@/lib/db/queries/user";
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -119,6 +120,18 @@ const signUpSchema = z.object({
   address: z.string().min(1),
 });
 
+/**
+ * Validates and processes user sign-up data.
+ *
+ * @param {Object} data - The validated form data matching signUpSchema
+ * @param {FormData} formData - The raw form data
+ *
+ * @returns {Promise<ActionState>} Returns an object containing:
+ * - On success: Redirects to dashboard or checkout
+ * - On error: Returns error message and field-specific errors
+ *
+ * @throws Will throw if database operations fail
+ */
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const {
     email,
@@ -132,11 +145,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     address,
   } = data;
 
-  const existingUser = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
+  const existingUser = await getUserByEmail(email);
 
   if (existingUser.length > 0) {
     return {
@@ -178,48 +187,40 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   let teamId: number;
   let userRole: string;
-  let createdTeam: typeof teams.$inferSelect | null = null;
+  // let createdTeam: typeof teams.$inferSelect | null = null;
 
-  // Create a new team if there's no invitation
-  const newTeam: NewTeam = {
-    name: `${email}'s Team`,
-  };
+  // // Create a new team if there's no invitation
+  // const newTeam: NewTeam = {
+  //   name: `${email}'s Team`,
+  // };
 
-  [createdTeam] = await db.insert(teams).values(newTeam).returning();
+  // [createdTeam] = await db.insert(teams).values(newTeam).returning();
 
-  if (!createdTeam) {
-    return {
-      error: "Failed to create team. Please try again.",
-      fieldErrors: {
-        email: "Failed to create team. Please try again.",
-      },
-      email,
-      password,
-    };
-  }
+  // if (!createdTeam) {
+  //   return {
+  //     error: "Failed to create team. Please try again.",
+  //     fieldErrors: {
+  //       email: "Failed to create team. Please try again.",
+  //     },
+  //     email,
+  //     password,
+  //   };
+  // }
 
-  teamId = createdTeam.id;
-  userRole = "owner";
+  // teamId = createdTeam.id;
+  // userRole = "owner";
 
-  await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
-
-  const newTeamMember: NewTeamMember = {
-    userId: createdUser.id,
-    teamId: teamId,
-    role: userRole,
-  };
-
-  await Promise.all([
-    db.insert(teamMembers).values(newTeamMember),
-    logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser),
-  ]);
-
-  const redirectTo = formData.get("redirect") as string | null;
-  if (redirectTo === "checkout") {
-    const priceId = formData.get("priceId") as string;
-    return createCheckoutSession({ team: createdTeam, priceId });
-  }
+  // const newTeamMember: NewTeamMember = {
+  //   userId: createdUser.id,
+  //   teamId: teamId,
+  //   role: userRole,
+  // };
+  await setSession(createdUser);
+  // await Promise.all([
+  // db.insert(teamMembers).values(newTeamMember),
+  // logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
+  // setSession(createdUser),
+  // ]);
 
   redirect("/dashboard");
 });

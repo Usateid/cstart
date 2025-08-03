@@ -4,22 +4,18 @@ import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CircleIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { signUp } from "@/app/(login)/actions";
 import { ActionState } from "@/lib/auth/middleware";
-
-// Componente helper per mostrare errori per campo
-function FieldError({ error }: { error?: string }) {
-  if (!error) return null;
-  return <div className="text-red-500 text-sm mt-1">{error}</div>;
-}
+import { FieldError } from "@/components/FieldError";
 
 export default function Register() {
+  // Add more information for the formData
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const priceId = searchParams.get("priceId");
   const inviteId = searchParams.get("inviteId");
+
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     signUp,
     { fieldErrors: {} }

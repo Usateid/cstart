@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { signToken, verifyToken } from "@/lib/auth/session";
 
-const protectedRoutes = "/dashboard";
+const protectedRoutes = ["/dashboard", "/profile"];
 const authRoutes = ["/sign-in", "/sign-up"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get("session");
-  const isProtectedRoute = pathname.startsWith(protectedRoutes);
+  const isProtectedRoute = protectedRoutes.includes(pathname);
   const isAuthRoute = authRoutes.includes(pathname);
 
   if (isProtectedRoute && !sessionCookie) {
