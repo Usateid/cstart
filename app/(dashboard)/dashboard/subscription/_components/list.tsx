@@ -1,12 +1,26 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 
 export default function SubscriptionList({ userId }: { userId: number }) {
-  const { data: activeBundles, isLoading } = useQuery({
-    queryKey: ["active-subscription", userId],
-    queryFn: () =>
-      fetch(`/api/subscriptions?id=${userId}`).then((res) => res.json()),
-  });
+  const [activeBundles, setActiveBundles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        const response = await fetch(`/api/subscriptions?id=${userId}`);
+        const data = await response.json();
+        setActiveBundles(data);
+      } catch (error) {
+        console.error("Failed to fetch subscriptions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubscriptions();
+  }, [userId]);
+
   return (
     <div>
       <span>
