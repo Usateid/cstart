@@ -5,8 +5,18 @@ import {
   text,
   timestamp,
   integer,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+// Define the enum for bundle durations
+export const bundleDurationEnum = pgEnum("bundle_duration", [
+  "ONE_WEEK",
+  "ONE_MONTH",
+  "THREE_MONTHS",
+  "SIX_MONTHS",
+  "ONE_YEAR",
+]);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -50,6 +60,17 @@ export const activityTypes = pgTable("activity_types", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const bundles = pgTable("bundles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  duration: bundleDurationEnum("duration").notNull(),
+  location: varchar("location", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const teamMembers = pgTable("team_members", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
@@ -62,6 +83,15 @@ export const teamMembers = pgTable("team_members", {
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });
 
+export const activeBundles = pgTable("active_bundles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  bundleId: integer("bundle_id")
+    .notNull()
+    .references(() => bundles.id),
+});
 export const activityLogs = pgTable("activity_logs", {
   id: serial("id").primaryKey(),
   teamId: integer("team_id")
@@ -108,6 +138,8 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
 export type NewTeam = typeof teams.$inferInsert;
+export type Bundle = typeof bundles.$inferSelect;
+export type ActiveBundle = typeof activeBundles.$inferSelect;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type ActivityTableType = typeof activityTypes.$inferSelect;
 export type NewActivityType = typeof activityTypes.$inferInsert;
@@ -129,4 +161,12 @@ export enum ActivityType {
   UPDATE_ACCOUNT = "UPDATE_ACCOUNT",
   CREATE_TEAM = "CREATE_TEAM",
   REMOVE_TEAM_MEMBER = "REMOVE_TEAM_MEMBER",
+}
+
+export enum BundleDuration {
+  ONE_WEEK = "ONE_WEEK",
+  ONE_MONTH = "ONE_MONTH",
+  THREE_MONTHS = "THREE_MONTHS",
+  SIX_MONTHS = "SIX_MONTHS",
+  ONE_YEAR = "ONE_YEAR",
 }
